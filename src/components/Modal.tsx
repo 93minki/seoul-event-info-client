@@ -1,44 +1,40 @@
-import React from "react";
 import ReactDOM from "react-dom";
-import { Event } from "../types/events";
-import EventDetail from "./EventDetail";
 
 type Props = {
   onClick: () => void;
-  event: Event;
+  modalContent: React.ReactNode;
 };
 
-const DetailModalBack = ({ onClick }: Pick<Props, "onClick">) => {
+const ModalBack = ({ onClick }: Pick<Props, "onClick">) => {
   return (
     <div
       className="w-full h-[100vh] bg-black opacity-50 z-[999] fixed top-0 left-0"
       onClick={onClick}
-    />
+    ></div>
   );
 };
 
-const DetailModalOverlay = ({ event }: Pick<Props, "event">) => {
+const ModalOverlay = ({ modalContent }: Pick<Props, "modalContent">) => {
   return (
     <div className="w-4/5 max-w-[1100px] h-[80vh] bg-white fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[9999] overflow-scroll">
-      <EventDetail event={event} />
+      {modalContent}
     </div>
   );
 };
 
-const DetailModal = ({ onClick, event }: Props) => {
+const Modal = ({ onClick, modalContent }: Props) => {
   return (
     <>
       {ReactDOM.createPortal(
-        <DetailModalBack onClick={onClick} />,
+        <ModalOverlay modalContent={modalContent} />,
         document.getElementById("modal")!
       )}
       {ReactDOM.createPortal(
-        <DetailModalOverlay event={event} />,
-        // document.getElementById("modal-overlay")!
+        <ModalBack onClick={onClick} />,
         document.getElementById("modal")!
       )}
     </>
   );
 };
 
-export default DetailModal;
+export default Modal;

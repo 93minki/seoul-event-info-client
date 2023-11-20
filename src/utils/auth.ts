@@ -5,10 +5,7 @@ type signupBody = {
   password: string;
 };
 
-const API_URL =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:3030"
-    : "https://web-production-d139.up.railway.app";
+const API_URL = "https://web-production-d139.up.railway.app";
 
 export async function postSignup(body: signupBody) {
   try {
@@ -34,8 +31,6 @@ type signinBody = {
 };
 // 로그인
 export async function postSignin(body: signinBody) {
-  console.log("body", body);
-  console.log("API URL", API_URL);
   try {
     const signinResult = fetch(`${API_URL}/auth/signIn`, {
       method: "POST",
@@ -53,18 +48,22 @@ export async function postSignin(body: signinBody) {
   }
 }
 
-export async function getUserMe(token: string | null) {
-  if (token === null) {
-    console.log("token null");
-    return;
+export async function getUserMe() {
+  const accessToken = localStorage.getItem("at");
+  if (accessToken === null) {
+    const data = {
+      code: 403,
+      message: "access token이 없습니다",
+    };
+    return data;
   }
-  console.log("token", token);
   try {
+    console.log("getUserMe 실행");
     const userInfo = fetch(`${API_URL}/user/me`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       credentials: "include",
     })
@@ -74,4 +73,22 @@ export async function getUserMe(token: string | null) {
   } catch (err) {
     console.error("fetch error", err);
   }
+}
+
+export async function getMyLikes() {
+  const accessToken = localStorage.getItem("at");
+
+  try {
+    const likesList = fetch(`${API_URL}/user/liked-events`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      credentials: "include",
+      next: { revalidate: 3600 },
+    })
+      .then((rs) => rs.json())
+      .then((data) => data.payload);
+
+    return likesList;
+  } catch {}
 }
